@@ -2,7 +2,7 @@ const KHADIJA_BIRTH_DATE = "2026-10-03T09:00:00+03:00";
 
 // الرابط الوحيد لإرسال التهنئة. بعد نشر Cloudflare Worker ضع رابطه هنا.
 // مثال: https://khadija-wishes.<account>.workers.dev
-const WISHES_API_URL = "https://YOUR-WORKER.workers.dev";
+const WISHES_API_URL = "https://khadija-wishes.youssefehab096.workers.dev";
 
 /* إعدادات احتفال خديجة — عدّلوا النصوص والصور من هنا. */
 const celebration = {
