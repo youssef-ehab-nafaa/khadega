@@ -721,11 +721,13 @@ function duaIsPlaying() {
 function paintSoundControl() {
   const button = $("#musicButton");
   const live = $("#duaLive");
+  const audio = duaElement();
   if (!button) return;
   const playing = duaIsPlaying();
-  button.classList.toggle("is-playing", playing);
-  button.setAttribute("aria-pressed", String(playing));
-  button.setAttribute("aria-label", t(playing ? "pauseDua" : "playDua"));
+  const on = playing || Boolean(audio && !duaMissing && !duaPaused && !audio.ended);
+  button.classList.toggle("is-playing", on);
+  button.setAttribute("aria-pressed", String(on));
+  button.setAttribute("aria-label", t(on ? "pauseDua" : "playDua"));
   if (live) live.hidden = !playing;
 }
 
@@ -745,7 +747,7 @@ function markDuaMissing() {
 function playDua() {
   const audio = duaElement();
   if (!audio || duaMissing || duaPaused || duaPlayPending || duaIsPlaying()) return;
-  if (audio.error || audio.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) {
+  if (audio.error) {
     markDuaMissing();
     return;
   }
@@ -758,7 +760,7 @@ function playDua() {
   }
   attempt.then(() => {
     duaPlayPending = false;
-    if (audio.error || audio.readyState === 0) markDuaMissing();
+    if (audio.error) markDuaMissing();
     else {
       removeDuaFallback();
       paintSoundControl();
@@ -786,16 +788,15 @@ function setupEntryDua() {
   const button = $("#musicButton");
   if (!audio || !button) return;
   audio.loop = false;
+  audio.autoplay = true;
+  audio.muted = false;
+  audio.volume = 1;
   audio.preload = "auto";
   audio.addEventListener("error", markDuaMissing);
-  audio.addEventListener("emptied", () => {
-    if (audio.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) markDuaMissing();
-  });
-  window.setTimeout(() => {
-    if (audio.error || audio.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) markDuaMissing();
-  }, 400);
   audio.addEventListener("play", paintSoundControl);
+  audio.addEventListener("playing", paintSoundControl);
   audio.addEventListener("pause", paintSoundControl);
+  audio.addEventListener("canplay", () => playDua());
   audio.addEventListener("ended", () => {
     duaPaused = false;
     removeDuaFallback();

@@ -28,7 +28,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=Cormorant+Garamond:ital,wght@0,500;1,500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=20261005-29">
+  <link rel="stylesheet" href="style.css?v=20261005-30">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -54,7 +54,7 @@
       <span class="wave" aria-hidden="true"><i></i><i></i><i></i></span>
       <span data-i18n="duaLive">دعاء لخديجة</span>
     </p>
-    <button class="music-button" id="musicButton" type="button" aria-pressed="false" data-i18n-aria="playDua" aria-label="تشغيل الدعاء">
+    <button class="music-button is-playing" id="musicButton" type="button" aria-pressed="true" data-i18n-aria="pauseDua" aria-label="إيقاف الدعاء">
       <svg class="icon-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10h3.2L11 6.5v11L7.2 14H4v-4z"/><path d="M15 9.2a3.6 3.6 0 0 1 0 5.6"/><path d="M17.2 7a6.2 6.2 0 0 1 0 10"/></svg>
       <svg class="icon-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10h3.2L11 6.5v11L7.2 14H4v-4z"/><path d="M16 10l4 4M20 10l-4 4"/></svg>
     </button>
@@ -251,9 +251,9 @@
     </div>
   </noscript>
 
-  <audio id="khadijaDua" preload="auto" playsinline>
-    <source src="assets/audio/khadija-dua.mp3?v=27" type="audio/mpeg">
+  <audio id="khadijaDua" autoplay preload="auto" playsinline>
+    <source src="assets/audio/khadija-dua.mp3?v=28" type="audio/mpeg">
   </audio>
-  <script src="script.js?v=20261005-29" defer></script>
+  <script src="script.js?v=20261005-30" defer></script>
 </body>
 </html>
