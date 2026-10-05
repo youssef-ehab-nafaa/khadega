@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="خديجة">
+  <rect width="64" height="64" rx="16" fill="#FFF9F5"/>
+  <circle cx="32" cy="32" r="22" fill="none" stroke="#C9A96E" stroke-width="1.4"/>
+  <path fill="#D8A7B1" d="M32 44.5c-.4 0-8.8-4.7-12.2-9.3-2.4-3.2-2.2-7.2.7-9.4 2.4-1.8 5.6-1.4 7.6.8L32 30.2l3.9-3.6c2-2.2 5.2-2.6 7.6-.8 2.9 2.2 3.1 6.2.7 9.4-3.4 4.6-11.8 9.3-12.2 9.3z"/>
+</svg>
