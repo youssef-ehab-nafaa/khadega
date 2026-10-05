@@ -1,0 +1,95 @@
+name: Add Khadija wish
+
+# A trusted caller triggers this with the Actions secret WISHES_GITHUB_TOKEN.
+# That secret is never placed in the website. This job commits with the
+# built-in GITHUB_TOKEN, which exists only inside GitHub Actions.
+on:
+  repository_dispatch:
+    types: [khadija-wish]
+  workflow_dispatch:
+    inputs:
+      name:
+        description: Name
+        required: true
+        type: string
+      message:
+        description: Wish
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: khadija-wishes
+  cancel-in-progress: false
+
+jobs:
+  add-wish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ github.token }}
+
+      - name: Validate and store the wish
+        env:
+          WISH_NAME: ${{ github.event_name == 'workflow_dispatch' && inputs.name || github.event.client_payload.name }}
+          WISH_MESSAGE: ${{ github.event_name == 'workflow_dispatch' && inputs.message || github.event.client_payload.message }}
+        run: |
+          python3 << 'PY'
+          import json, os, re, uuid
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          name = os.environ.get("WISH_NAME", "")
+          message = os.environ.get("WISH_MESSAGE", "")
+          name = re.sub(r"[\u0000-\u001F\u007F]", "", name).strip()
+          message = re.sub(r"[\u0000-\u001F\u007F]", "", message).strip()
+
+          def reject(reason):
+              raise SystemExit(reason)
+
+          if not name or not message:
+              reject("Name and wish are required.")
+          if len(name) > 50:
+              reject("Name is too long.")
+          if len(message) > 500:
+              reject("Wish is too long.")
+          if "<" in name or ">" in name or "<" in message or ">" in message:
+              reject("HTML is not allowed.")
+          if re.search(r"(?i)<\s*script|javascript:|on\w+\s*=", name + message):
+              reject("Scripts are not allowed.")
+
+          path = Path("data/wishes.json")
+          data = json.loads(path.read_text(encoding="utf-8"))
+          wishes = data.get("wishes", [])
+          if not isinstance(wishes, list):
+              wishes = []
+          if any(item.get("name") == name and item.get("message") == message for item in wishes if isinstance(item, dict)):
+              print("Duplicate wish, nothing to commit.")
+              Path(".wish-skip").write_text("skip", encoding="utf-8")
+              raise SystemExit(0)
+
+          wish = {
+              "id": str(uuid.uuid4()),
+              "name": name,
+              "message": message,
+              "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+          }
+          wishes.insert(0, wish)
+          path.write_text(json.dumps({"wishes": wishes[:500]}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          print("Wish stored.")
+          PY
+
+      - name: Commit the shared wishes
+        if: success()
+        run: |
+          if [ -f .wish-skip ]; then
+            echo "No file change."
+            exit 0
+          fi
+          git add data/wishes.json
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "Add a shared wish for Khadija"
+          git push origin HEAD:main

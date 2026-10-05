@@ -641,11 +641,12 @@ h2 {
 .wish-grid { display: grid; gap: 12px; }
 .wish-card {
   margin: 0;
-  padding: 20px 18px;
+  padding: 14px 16px;
   background: var(--white);
   border: 1px solid var(--line);
-  border-radius: 22px;
+  border-radius: 16px;
 }
+.wish-more { margin: 14px auto 0; }
 .wish-card p { margin: 0 0 12px; overflow-wrap: anywhere; white-space: pre-wrap; }
 .wish-card footer { display: flex; justify-content: space-between; gap: 10px; color: var(--gold-ink); font-size: 0.82rem; }
 .wish-empty {

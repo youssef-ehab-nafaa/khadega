@@ -28,7 +28,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=Cormorant+Garamond:ital,wght@0,500;1,500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=20261005-31">
+  <link rel="stylesheet" href="style.css?v=20261005-32">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -182,18 +182,19 @@
           </div>
           <div class="field">
             <label for="wishName" data-i18n="wishName">الاسم</label>
-            <input id="wishName" name="name" type="text" autocomplete="name" required maxlength="60" data-i18n-placeholder="wishNamePh" placeholder="اكتب اسمك">
+            <input id="wishName" name="name" type="text" autocomplete="name" required maxlength="50" data-i18n-placeholder="wishNamePh" placeholder="اكتب اسمك">
             <small class="error" id="wishNameError"></small>
           </div>
           <div class="field">
             <label for="wishMessage" data-i18n="wishMessage">رسالتك</label>
-            <textarea id="wishMessage" name="message" rows="4" required maxlength="400" data-i18n-placeholder="wishMessagePh" placeholder="كلماتكم تسعد خديجة وأهلها"></textarea>
+            <textarea id="wishMessage" name="message" rows="4" required maxlength="500" data-i18n-placeholder="wishMessagePh" placeholder="اكتب تهنئتك لخديجة..."></textarea>
             <small class="error" id="wishMessageError"></small>
           </div>
           <p class="form-help" id="wishHelp"></p>
-          <button class="button button-gold submit-button" type="submit" data-i18n="sendWish">إرسال التهنئة</button>
+          <button class="button button-gold submit-button" type="submit" data-i18n="sendWish">إرسال التهنئة 🤍</button>
         </form>
         <div class="wish-grid" id="wishList" aria-live="polite"></div>
+        <button class="button button-line wish-more" id="wishMore" type="button" hidden data-i18n="showMoreWishes">عرض المزيد</button>
       </div>
     </section>
 
@@ -254,6 +255,6 @@
   <audio id="khadijaDua" autoplay preload="auto" playsinline>
     <source src="assets/audio/khadija-dua.mp3?v=29" type="audio/mpeg">
   </audio>
-  <script src="script.js?v=20261005-31" defer></script>
+  <script src="script.js?v=20261005-32" defer></script>
 </body>
 </html>

@@ -4,7 +4,6 @@ const KHADIJA_BIRTH_DATE = "2026-10-03T09:00:00+03:00";
 const celebration = {
   baby: { ar: "خديجة", en: "Khadija" },
   birthDate: KHADIJA_BIRTH_DATE,
-  wishesEndpoint: "",
   websiteUrl: "",
   musicFile: "",
   defaultLanguage: "ar",
@@ -84,18 +83,22 @@ const translations = {
     wishName: "الاسم",
     wishNamePh: "اكتب اسمك",
     wishMessage: "رسالتك",
-    wishMessagePh: "كلماتكم تسعد خديجة وأهلها",
-    wishHelpLocal: "تظهر تهنئتكم في هذه الصفحة وتُحفظ على جهازكم.",
-    wishHelpRemote: "تُرسل التهنئة للحفظ المشترك وتظهر هنا أيضًا.",
-    sendWish: "إرسال التهنئة",
+    wishMessagePh: "اكتب تهنئتك لخديجة...",
+    wishHelp: "التهاني المعروضة هنا محفوظة في الموقع وتظهر لكل الزوار.",
+    sendWish: "إرسال التهنئة 🤍",
     nameRequired: "من فضلك اكتب اسمك.",
-    messageRequired: "من فضلك اكتب رسالة التهنئة.",
-    sending: "جارٍ الإرسال...",
-    sent: "وصلت تهنئتكم، بارك الله لكم.",
-    savedLocal: "ظهرت تهنئتكم هنا على هذا الجهاز.",
-    sendFailed: "ظهرت التهنئة هنا، وتعذر إرسالها للحفظ المشترك.",
-    slowDown: "شكرًا لقلوبكم، انتظروا لحظة قبل تهنئة أخرى.",
-    wishesEmpty: "لم تصل تهنئات بعد. كونوا أول من يبارك لخديجة.",
+    messageRequired: "من فضلك اكتب تهنئة.",
+    nameTooLong: "الاسم أطول من ٥٠ حرفًا.",
+    messageTooLong: "التهنئة أطول من ٥٠٠ حرف.",
+    htmlRejected: "اكتب التهنئة نصًا فقط، من غير أكواد.",
+    sending: "جاري إرسال تهنئتك...",
+    wishSaved: "تم حفظ تهنئتك لخديجة 🤍",
+    wishBlocked: "المتصفح لا يستطيع حفظ التهنئة في المستودع. GitHub Pages لا يقبل الكتابة، ووضع مفتاح GitHub في الصفحة يكشف صلاحية المستودع.",
+    slowDown: "يمكن إرسال تهنئة واحدة كل دقيقة.",
+    duplicateWish: "هذه التهنئة مُرسلة بالفعل.",
+    wishesEmpty: "كونوا أول من يترك لخديجة دعوة جميلة 🤍",
+    wishesLoadFailed: "تعذر تحميل التهاني الآن.",
+    showMoreWishes: "عرض المزيد",
     closingLine: "اللهم احفظ خديجة وبارك لنا فيها 🤍",
     closingThanks: "الحمد لله على أجمل نعمة",
     duaLive: "دعاء لخديجة",
@@ -163,20 +166,24 @@ const translations = {
     wishTitle: "Leave a wish for Khadija 🤍",
     wishText: "Write her a prayer or a few words we can keep from this beautiful day.",
     wishName: "Name",
-    wishNamePh: "Your name",
+    wishNamePh: "Write your name",
     wishMessage: "Your message",
-    wishMessagePh: "Your words will make Khadija’s family smile",
-    wishHelpLocal: "Your wish appears on this page and is saved on your device.",
-    wishHelpRemote: "Your wish is sent to the shared collection and also appears here.",
-    sendWish: "Send wish",
+    wishMessagePh: "Write your wish for Khadija...",
+    wishHelp: "The wishes shown here are saved on the site and appear for every visitor.",
+    sendWish: "Send wish 🤍",
     nameRequired: "Please enter your name.",
     messageRequired: "Please write a wish.",
-    sending: "Sending...",
-    sent: "Your wish arrived. May Allah bless you.",
-    savedLocal: "Your wish is now shown on this device.",
-    sendFailed: "Your wish is shown here, but it could not be sent to the shared collection.",
-    slowDown: "Thank you. Please wait a moment before another wish.",
-    wishesEmpty: "No wishes yet. Be the first to bless Khadija.",
+    nameTooLong: "The name is longer than 50 characters.",
+    messageTooLong: "The wish is longer than 500 characters.",
+    htmlRejected: "Write the wish as plain text, without code.",
+    sending: "Sending your wish...",
+    wishSaved: "Your wish for Khadija has been saved 🤍",
+    wishBlocked: "The browser cannot save a wish into the repository. GitHub Pages cannot write files, and placing a GitHub key in the page would expose the repository.",
+    slowDown: "You can send one wish per minute.",
+    duplicateWish: "This wish was already sent.",
+    wishesEmpty: "Be the first to leave Khadija a beautiful prayer 🤍",
+    wishesLoadFailed: "The wishes could not be loaded right now.",
+    showMoreWishes: "Show more",
     closingLine: "O Allah, protect Khadija and bless her for us 🤍",
     closingThanks: "Praise be to Allah for the most beautiful blessing",
     duaLive: "A prayer for Khadija",
@@ -202,7 +209,9 @@ const seo = {
   }
 };
 
-const WISH_KEY = "khadija-wishes";
+const WISH_COOLDOWN_KEY = "khadija-wish-sent-at";
+const WISH_PAGE_SIZE = 12;
+const WISH_POLL_MS = 90000;
 const DUA_KEY = "khadija-duas";
 const LANG_KEY = "khadija-language";
 const MUSIC_KEY = "khadija-music";
@@ -308,7 +317,9 @@ function applyLanguage(language) {
   $('meta[property="og:image:alt"]').content = meta.imageAlt;
   $('meta[name="twitter:image:alt"]').content = meta.imageAlt;
 
-  $("#wishHelp").textContent = celebration.wishesEndpoint ? t("wishHelpRemote") : t("wishHelpLocal");
+  $("#wishHelp").textContent = t("wishHelp");
+  const wishMore = $("#wishMore");
+  if (wishMore) wishMore.textContent = t("showMoreWishes");
   if (typeof paintSoundControl === "function") paintSoundControl();
   languageApplied = true;
   const zoom = $("#lightboxZoom");
@@ -399,28 +410,72 @@ function moveGallery(step) {
   updateLightbox();
 }
 
-function readWishes() {
+let sharedWishes = [];
+let wishesVisible = WISH_PAGE_SIZE;
+let wishesLoaded = false;
+let lastWishFingerprint = "";
+
+function wishFingerprint(name, message) {
+  return `${name}\n${message}`;
+}
+
+function normalizeWish(wish) {
+  if (!wish || typeof wish.name !== "string" || typeof wish.message !== "string") return null;
+  const name = wish.name.trim();
+  const message = wish.message.trim();
+  if (!name || !message || name.length > 50 || message.length > 500) return null;
+  if (/[<>]/.test(name) || /[<>]/.test(message)) return null;
+  return {
+    id: typeof wish.id === "string" ? wish.id : "",
+    name,
+    message,
+    created_at: typeof wish.created_at === "string" ? wish.created_at : ""
+  };
+}
+
+function sortedWishes() {
+  return [...sharedWishes].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+}
+
+async function loadSharedWishes() {
+  const list = $("#wishList");
   try {
-    const parsed = JSON.parse(localStorage.getItem(WISH_KEY) || "[]");
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter((wish) => wish && typeof wish.name === "string" && typeof wish.message === "string").slice(0, 30);
+    const response = await fetch(`data/wishes.json?t=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error("wishes");
+    const data = await response.json();
+    const rows = Array.isArray(data) ? data : data && data.wishes;
+    sharedWishes = (Array.isArray(rows) ? rows : []).map(normalizeWish).filter(Boolean);
+    wishesLoaded = true;
+    renderWishes();
   } catch {
-    return [];
+    wishesLoaded = false;
+    if (!list) return;
+    list.replaceChildren();
+    const note = document.createElement("p");
+    note.className = "wish-empty";
+    note.textContent = t("wishesLoadFailed");
+    list.append(note);
+    const more = $("#wishMore");
+    if (more) more.hidden = true;
   }
 }
+
 function renderWishes() {
   const list = $("#wishList");
-  const wishes = readWishes();
+  const more = $("#wishMore");
+  if (!list) return;
   list.replaceChildren();
+  const wishes = sortedWishes();
   if (!wishes.length) {
     const empty = document.createElement("p");
     empty.className = "wish-empty";
     empty.textContent = t("wishesEmpty");
     list.append(empty);
+    if (more) more.hidden = true;
     return;
   }
   const formatter = new Intl.DateTimeFormat(locale(), { dateStyle: "medium", timeZone: "Africa/Cairo" });
-  wishes.forEach((wish) => {
+  wishes.slice(0, wishesVisible).forEach((wish) => {
     const card = document.createElement("article");
     card.className = "wish-card";
     const quote = document.createElement("p");
@@ -429,12 +484,16 @@ function renderWishes() {
     const name = document.createElement("strong");
     name.textContent = wish.name;
     const date = document.createElement("time");
-    date.dateTime = wish.at || "";
-    date.textContent = wish.at ? formatter.format(new Date(wish.at)) : "";
+    if (wish.created_at) {
+      date.dateTime = wish.created_at;
+      const parsed = new Date(wish.created_at);
+      date.textContent = Number.isNaN(parsed.getTime()) ? "" : formatter.format(parsed);
+    }
     footer.append(name, date);
     card.append(quote, footer);
     list.append(card);
   });
+  if (more) more.hidden = wishesVisible >= wishes.length;
 }
 
 function duaTotal() {
@@ -591,41 +650,59 @@ function setupDua() {
   });
 }
 
+function wishFieldError(name, message) {
+  const rawName = String(name);
+  const rawMessage = String(message);
+  if (/[<>]|<\s*script|javascript:|on\w+\s*=/i.test(rawName) || /[<>]|<\s*script|javascript:|on\w+\s*=/i.test(rawMessage)) {
+    return { field: "message", key: "htmlRejected" };
+  }
+  const cleanName = cleanText(rawName, 50);
+  const cleanMessage = cleanText(rawMessage, 500);
+  if (!cleanName) return { field: "name", key: rawName.trim() ? "htmlRejected" : "nameRequired" };
+  if (rawName.trim().length > 50) return { field: "name", key: "nameTooLong" };
+  if (!cleanMessage) return { field: "message", key: rawMessage.trim() ? "htmlRejected" : "messageRequired" };
+  if (rawMessage.trim().length > 500) return { field: "message", key: "messageTooLong" };
+  return { name: cleanName, message: cleanMessage };
+}
+
 function setupWishes() {
   const form = $("#wishForm");
-  let lastSubmit = 0;
-  form.addEventListener("submit", async (event) => {
+  const more = $("#wishMore");
+  if (more) {
+    more.addEventListener("click", () => {
+      wishesVisible += WISH_PAGE_SIZE;
+      renderWishes();
+    });
+  }
+  loadSharedWishes();
+  window.setInterval(loadSharedWishes, WISH_POLL_MS);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") loadSharedWishes();
+  });
+
+  form.addEventListener("submit", (event) => {
     event.preventDefault();
     $("#wishNameError").textContent = "";
     $("#wishMessageError").textContent = "";
     if ($("#faxNumber").value) return;
 
-    const name = cleanText($("#wishName").value, 60);
-    const message = cleanText($("#wishMessage").value, 400);
-    let valid = true;
-    if (!name) {
-      $("#wishNameError").textContent = t("nameRequired");
-      valid = false;
+    const checked = wishFieldError($("#wishName").value, $("#wishMessage").value);
+    if (checked.field) {
+      const target = checked.field === "name" ? "#wishNameError" : "#wishMessageError";
+      $(target).textContent = t(checked.key);
+      return;
     }
-    if (!message) {
-      $("#wishMessageError").textContent = t("messageRequired");
-      valid = false;
-    }
-    if (!valid) return;
-    if (Date.now() - lastSubmit < 10000) {
+
+    const sentAt = Number(localStorage.getItem(WISH_COOLDOWN_KEY) || 0);
+    if (Date.now() - sentAt < 60000) {
       showToast(t("slowDown"));
       return;
     }
 
-    const wish = { name, message, at: new Date().toISOString() };
-    const wishes = [wish, ...readWishes()].slice(0, 30);
-    localStorage.setItem(WISH_KEY, JSON.stringify(wishes));
-    lastSubmit = Date.now();
-    form.reset();
-    renderWishes();
-
-    if (!celebration.wishesEndpoint) {
-      showToast(t("savedLocal"));
+    const fingerprint = wishFingerprint(checked.name, checked.message);
+    const alreadyShared = sharedWishes.some((wish) => wish.name === checked.name && wish.message === checked.message);
+    if (alreadyShared || fingerprint === lastWishFingerprint) {
+      showToast(t("duplicateWish"));
       return;
     }
 
@@ -633,25 +710,13 @@ function setupWishes() {
     const original = submitButton.textContent;
     submitButton.disabled = true;
     submitButton.textContent = t("sending");
-    const body = new FormData();
-    body.append("name", name);
-    body.append("message", message);
-    body.append("language", currentLanguage);
-    body.append("_subject", currentLanguage === "ar" ? "تهنئة لخديجة" : "A wish for Khadija");
-    try {
-      const response = await fetch(celebration.wishesEndpoint, {
-        method: "POST",
-        body,
-        headers: { Accept: "application/json" }
-      });
-      if (!response.ok) throw new Error("Wish could not be sent");
-      showToast(t("sent"));
-    } catch {
-      showToast(t("sendFailed"));
-    } finally {
+    lastWishFingerprint = fingerprint;
+    localStorage.setItem(WISH_COOLDOWN_KEY, String(Date.now()));
+    window.setTimeout(() => {
       submitButton.disabled = false;
       submitButton.textContent = original;
-    }
+      showToast(t("wishBlocked"));
+    }, 400);
   });
 }
 
