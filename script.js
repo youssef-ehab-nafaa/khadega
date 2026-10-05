@@ -1,5 +1,9 @@
 const KHADIJA_BIRTH_DATE = "2026-10-03T09:00:00+03:00";
 
+// الرابط الوحيد لإرسال التهنئة. بعد نشر Cloudflare Worker ضع رابطه هنا.
+// مثال: https://khadija-wishes.<account>.workers.dev
+const WISHES_API_URL = "https://YOUR-WORKER.workers.dev";
+
 /* إعدادات احتفال خديجة — عدّلوا النصوص والصور من هنا. */
 const celebration = {
   baby: { ar: "خديجة", en: "Khadija" },
@@ -92,8 +96,9 @@ const translations = {
     messageTooLong: "التهنئة أطول من ٥٠٠ حرف.",
     htmlRejected: "اكتب التهنئة نصًا فقط، من غير أكواد.",
     sending: "جاري إرسال تهنئتك...",
-    wishSaved: "تم حفظ تهنئتك لخديجة 🤍",
-    wishBlocked: "المتصفح لا يستطيع حفظ التهنئة في المستودع. GitHub Pages لا يقبل الكتابة، ووضع مفتاح GitHub في الصفحة يكشف صلاحية المستودع.",
+    wishReceived: "تم استلام تهنئتك لخديجة 🤍",
+    wishLater: "ستظهر للجميع بعد تحديث الموقع.",
+    wishFailed: "تعذر إرسال التهنئة حاليًا، حاول مرة أخرى بعد قليل 🤍",
     slowDown: "يمكن إرسال تهنئة واحدة كل دقيقة.",
     duplicateWish: "هذه التهنئة مُرسلة بالفعل.",
     wishesEmpty: "كونوا أول من يترك لخديجة دعوة جميلة 🤍",
@@ -177,8 +182,9 @@ const translations = {
     messageTooLong: "The wish is longer than 500 characters.",
     htmlRejected: "Write the wish as plain text, without code.",
     sending: "Sending your wish...",
-    wishSaved: "Your wish for Khadija has been saved 🤍",
-    wishBlocked: "The browser cannot save a wish into the repository. GitHub Pages cannot write files, and placing a GitHub key in the page would expose the repository.",
+    wishReceived: "Your wish for Khadija was received 🤍",
+    wishLater: "It will appear for everyone after the site updates.",
+    wishFailed: "The wish could not be sent right now. Please try again in a little while 🤍",
     slowDown: "You can send one wish per minute.",
     duplicateWish: "This wish was already sent.",
     wishesEmpty: "Be the first to leave Khadija a beautiful prayer 🤍",
@@ -414,6 +420,7 @@ let sharedWishes = [];
 let wishesVisible = WISH_PAGE_SIZE;
 let wishesLoaded = false;
 let lastWishFingerprint = "";
+let wishSending = false;
 
 function wishFingerprint(name, message) {
   return `${name}\n${message}`;
@@ -514,11 +521,23 @@ function pageUrl() {
 
 const toast = $("#toast");
 let toastTimer;
-function showToast(message) {
+function showToast(message, duration = 2800) {
   clearTimeout(toastTimer);
   toast.textContent = message;
   toast.classList.add("visible");
-  toastTimer = setTimeout(() => toast.classList.remove("visible"), 2800);
+  toastTimer = setTimeout(() => toast.classList.remove("visible"), duration);
+}
+
+function wishesEndpoint() {
+  try {
+    const url = new URL(WISHES_API_URL);
+    const local = url.hostname === "127.0.0.1" || url.hostname === "localhost";
+    if (url.protocol !== "https:" && !local) return "";
+    if (/your-worker|your-subdomain/i.test(url.hostname)) return "";
+    return url.href;
+  } catch {
+    return "";
+  }
 }
 
 function setupNavigation() {
@@ -680,8 +699,9 @@ function setupWishes() {
     if (document.visibilityState === "visible") loadSharedWishes();
   });
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
+    if (wishSending) return;
     $("#wishNameError").textContent = "";
     $("#wishMessageError").textContent = "";
     if ($("#faxNumber").value) return;
@@ -706,17 +726,44 @@ function setupWishes() {
       return;
     }
 
+    const endpoint = wishesEndpoint();
     const submitButton = form.querySelector('button[type="submit"]');
-    const original = submitButton.textContent;
+    if (!endpoint) {
+      showToast(t("wishFailed"));
+      return;
+    }
+
+    wishSending = true;
     submitButton.disabled = true;
     submitButton.textContent = t("sending");
-    lastWishFingerprint = fingerprint;
-    localStorage.setItem(WISH_COOLDOWN_KEY, String(Date.now()));
-    window.setTimeout(() => {
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: checked.name, message: checked.message })
+      });
+      if (response.status === 429) {
+        showToast(t("slowDown"));
+        return;
+      }
+      const data = response.ok ? await response.json().catch(() => null) : null;
+      if (!data || data.success !== true) {
+        showToast(t("wishFailed"));
+        return;
+      }
+      localStorage.setItem(WISH_COOLDOWN_KEY, String(Date.now()));
+      lastWishFingerprint = fingerprint;
+      $("#wishName").value = "";
+      $("#wishMessage").value = "";
+      showToast(`${t("wishReceived")}\n${t("wishLater")}`, 5600);
+      window.setTimeout(loadSharedWishes, 45000);
+    } catch {
+      showToast(t("wishFailed"));
+    } finally {
+      wishSending = false;
       submitButton.disabled = false;
-      submitButton.textContent = original;
-      showToast(t("wishBlocked"));
-    }, 400);
+      submitButton.textContent = t("sendWish");
+    }
   });
 }
 

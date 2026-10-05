@@ -1,0 +1,12 @@
+name = "khadija-wishes"
+main = "src/index.js"
+compatibility_date = "2026-10-05"
+
+# Deploy after logging in:
+#   npx wrangler deploy
+# Then create the secret. Do not write its value in this file:
+#   npx wrangler secret put WISHES_GITHUB_TOKEN
+
+[vars]
+GITHUB_REPOSITORY = "youssef-ehab-nafaa/khadega"
+DISPATCH_EVENT = "khadija-wish"

@@ -5,3 +5,8 @@ WhatsApp Unknown */
 .DS_Store
 Thumbs.db
 desktop.ini
+
+node_modules/
+.wrangler/
+.dev.vars
+cloudflare-worker/.dev.vars

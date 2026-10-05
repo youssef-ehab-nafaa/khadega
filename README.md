@@ -11,7 +11,7 @@
 لحظة الميلاد الرسمية في `KHADIJA_BIRTH_DATE` بأعلى `script.js`: `2026-10-03T09:00:00` بتوقيت القاهرة.
 
 - `gallery` صور خديجة داخل `assets/images/khadija/`.
-- التهاني المشتركة في `data/wishes.json`. الصفحة تقرأ هذا الملف فقط. الإضافة تتم عبر GitHub Actions (`khadija-wish`) حتى لا يوضع مفتاح المستودع في الموقع.
+- التهاني المشتركة في `data/wishes.json`. الصفحة تقرأ هذا الملف فقط. الإرسال يتم إلى Cloudflare Worker، وهو الذي يشغّل GitHub Action باسم Add Khadija wish. ضع رابط الـWorker في `WISHES_API_URL` داخل `script.js`، وضع السر `WISHES_GITHUB_TOKEN` على Cloudflare فقط.
 - `websiteUrl` رابط الموقع بعد النشر، حتى تعمل المشاركة والنسخ بشكل صحيح.
 - الدعاء يُقرأ بصوت المتصفح عند فتح الصفحة إن سمح، ومن أول لمسة إن مُنع التشغيل التلقائي.
 
