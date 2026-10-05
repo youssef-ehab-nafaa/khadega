@@ -746,41 +746,35 @@ function markDuaMissing() {
 
 function playDua() {
   const audio = duaElement();
-  if (!audio || duaMissing || duaPaused || duaPlayPending || duaIsPlaying()) return;
+  if (!audio || duaMissing || duaPaused || duaIsPlaying()) return;
   if (audio.error) {
     markDuaMissing();
     return;
   }
-  duaPlayPending = true;
+  if (audio.ended) audio.currentTime = 0;
   const attempt = audio.play();
   if (!attempt || typeof attempt.then !== "function") {
-    duaPlayPending = false;
     paintSoundControl();
     return;
   }
   attempt.then(() => {
-    duaPlayPending = false;
     if (audio.error) markDuaMissing();
     else {
       removeDuaFallback();
       paintSoundControl();
     }
-  }).catch((error) => {
-    duaPlayPending = false;
-    if (!error || error.name !== "NotAllowedError") markDuaMissing();
+  }).catch(() => {
+    if (audio.error) markDuaMissing();
     else paintSoundControl();
   });
 }
 
 function onFirstGesture(event) {
-  if (duaMissing || event.target?.closest?.("#musicButton")) return;
+  if (event.target?.closest?.("#musicButton")) return;
   const audio = duaElement();
-  if (!audio) return;
-  if (duaPaused || duaIsPlaying() || audio.ended) {
-    if (duaIsPlaying() || audio.ended) removeDuaFallback();
-    return;
-  }
-  playDua();
+  if (!audio || duaPaused || duaMissing) return;
+  if (audio.ended) audio.currentTime = 0;
+  if (!duaIsPlaying()) playDua();
 }
 
 function setupEntryDua() {
@@ -795,8 +789,11 @@ function setupEntryDua() {
   audio.addEventListener("error", markDuaMissing);
   audio.addEventListener("play", paintSoundControl);
   audio.addEventListener("playing", paintSoundControl);
-  audio.addEventListener("pause", paintSoundControl);
-  audio.addEventListener("canplay", () => playDua());
+  audio.addEventListener("pause", () => {
+    paintSoundControl();
+    if (!duaPaused && !audio.ended && !audio.error && audio.currentTime > 0.2) playDua();
+  });
+  audio.addEventListener("canplay", () => playDua(), { once: true });
   audio.addEventListener("ended", () => {
     duaPaused = false;
     removeDuaFallback();

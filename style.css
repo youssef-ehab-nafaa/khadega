@@ -82,7 +82,7 @@ section[id] { scroll-margin-top: 72px; scroll-margin-bottom: var(--nav-space); }
 .topbar {
   position: absolute;
   z-index: 40;
-  top: calc(26px + env(safe-area-inset-top));
+  top: calc(64px + env(safe-area-inset-top));
   left: 0;
   right: 0;
   display: flex;
@@ -115,7 +115,7 @@ section[id] { scroll-margin-top: 72px; scroll-margin-bottom: var(--nav-space); }
 .music-button {
   position: fixed;
   z-index: 60;
-  top: calc(26px + env(safe-area-inset-top));
+  top: calc(64px + env(safe-area-inset-top));
   inset-inline-end: 12px;
   width: 44px;
   height: 44px;
@@ -864,7 +864,7 @@ html, body { max-width: 100%; overflow-x: clip; }
 .sound-dock {
   position: fixed;
   z-index: 60;
-  top: calc(26px + env(safe-area-inset-top));
+  top: calc(64px + env(safe-area-inset-top));
   inset-inline-end: 12px;
   display: flex;
   align-items: center;
@@ -1177,7 +1177,7 @@ html, body { max-width: 100%; overflow-x: clip; }
 .hero-stage { min-height: 0; }
 .hero-stage {
   justify-content: flex-start;
-  padding: calc(74px + env(safe-area-inset-top)) 18px 20px;
+  padding: calc(128px + env(safe-area-inset-top)) 18px 20px;
   gap: 8px;
 }
 .hero-hamd { margin-bottom: 4px; }
@@ -1250,7 +1250,7 @@ footer p { font-size: 0.88rem; }
     align-items: center;
     min-height: 0;
     justify-content: center;
-    padding: 80px 48px 16px;
+    padding: 168px 48px 16px;
   }
   .hero-photo { width: min(28vw, 340px); order: 2; }
   .hero-photo img { height: min(42vh, 460px); }
