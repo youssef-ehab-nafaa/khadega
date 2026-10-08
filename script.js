@@ -12,14 +12,13 @@ const celebration = {
   musicFile: "",
   defaultLanguage: "ar",
   gallery: [
-    { src: "assets/images/khadija/hero.webp", thumb: "assets/images/khadija/hero-sm.webp", layout: "feature", focus: "face", alt: { ar: "خديجة", en: "Khadija" } },
     { src: "assets/images/khadija/letter.webp", thumb: "assets/images/khadija/letter-sm.webp", layout: "side", focus: "face", alt: { ar: "خديجة", en: "Khadija" } },
     { src: "assets/images/khadija/face.webp", thumb: "assets/images/khadija/face-sm.webp", layout: "side", focus: "face", alt: { ar: "خديجة", en: "Khadija" } },
     { src: "assets/images/khadija/held.webp", thumb: "assets/images/khadija/held-sm.webp", layout: "side", focus: "center", alt: { ar: "خديجة", en: "Khadija" } },
-    { src: "assets/images/khadija/feet.webp", thumb: "assets/images/khadija/feet-sm.webp", layout: "wide", focus: "center", alt: { ar: "خديجة", en: "Khadija" } },
+    { src: "assets/images/khadija/feet.webp", thumb: "assets/images/khadija/feet-sm.webp", layout: "side", focus: "center", alt: { ar: "خديجة", en: "Khadija" } },
     { src: "assets/images/khadija/detail.webp", thumb: "assets/images/khadija/detail-sm.webp", layout: "side", focus: "center", alt: { ar: "خديجة", en: "Khadija" } },
     { src: "assets/images/khadija/foot.webp", thumb: "assets/images/khadija/foot-sm.webp", layout: "side", focus: "center", alt: { ar: "خديجة", en: "Khadija" } },
-    { src: "assets/images/khadija/hand.webp", thumb: "assets/images/khadija/hand-sm.webp", layout: "wide", focus: "center", alt: { ar: "خديجة", en: "Khadija" } }
+    { src: "assets/images/khadija/hand.webp", thumb: "assets/images/khadija/hand-sm.webp", layout: "side", focus: "center", alt: { ar: "خديجة", en: "Khadija" } }
   ]
 };
 
